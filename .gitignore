@@ -5,3 +5,5 @@ lyric.py
 weather.py
 requirements.txt
 templates/
+.github/
+worker/
