@@ -21,6 +21,9 @@ const THEMES = [
   { name: "花", keywords: ["邓丽君 花", "费玉清 花", "孟庭苇 花", "梅艳芳 花"], bg: "flower" },
   { name: "夜", keywords: ["蔡琴 夜", "邓丽君 月亮", "费玉清 夜", "齐秦 夜"], bg: "night" },
   { name: "时光", keywords: ["罗大佑 光阴", "李宗盛 时光", "周华健 时光", "陈奕迅 时光"], bg: "time" },
+  { name: "R&B", keywords: ["陶喆", "王力宏 R&B", "方大同", "周杰伦 R&B"], bg: "rnb" },
+  { name: "港台情歌", keywords: ["张学友 情歌", "陈奕迅 情歌", "林俊杰", "孙燕姿"], bg: "canto" },
+  { name: "粤语经典", keywords: ["陈奕迅 粤语", "张国荣 粤语", "谭咏麟 粤语", "Beyond 粤语"], bg: "cantonese" },
 ];
 
 const SEASON_KW = {
@@ -98,20 +101,101 @@ async function getLyric(songId) {
 
 function pickBestLines(lines, count = 4) {
   if (!lines || !lines.length) return [];
-  let cands = lines.filter(l => l.length >= 5 && l.length <= 30);
-  if (!cands.length) cands = lines;
-  const mid = Math.floor(cands.length / 2);
-  const win = Math.max(count * 2, 6);
-  const start = Math.max(0, mid - Math.floor(win / 2));
-  const end = Math.min(cands.length, start + win);
-  const seg = cands.slice(start, end);
-  if (seg.length <= count) return seg;
-  let bestI = 0, bestS = 0;
-  for (let i = 0; i <= seg.length - count; i++) {
-    const score = seg.slice(i, i + count).reduce((s, l) => s + Math.min(l.length, 20), 0);
+  let cands = lines.filter(l => l.length >= 4 && l.length <= 40);
+  if (cands.length < count) cands = lines;
+
+  // Try to find chorus (repeated segment)
+  const chorus = findChorus(cands, count);
+  if (chorus) return ensureCompleteSentences(chorus, lines);
+
+  // Find most complete segment
+  return findCompleteSegment(cands, count);
+}
+
+function isSentenceStart(text) {
+  if (!text) return false;
+  const first = text[0];
+  return !"而但却就才还也又的地得和与及因为所以如果虽然".includes(first);
+}
+
+function isSentenceEnd(text) {
+  if (!text) return false;
+  const last = text[text.length - 1];
+  return "。！？；…~—》」』\"\"".includes(last);
+}
+
+function ensureCompleteSentences(segment, allLines) {
+  const result = [...segment];
+  if (!result.length) return result;
+
+  // If first line is not a sentence start, try prepending the previous line
+  if (!isSentenceStart(result[0])) {
+    const idx = allLines.indexOf(result[0]);
+    if (idx > 0 && !isSentenceStart(allLines[idx])) {
+      // The line before might be the real start
+      if (isSentenceStart(allLines[idx - 1])) {
+        result.unshift(allLines[idx - 1]);
+      }
+    }
+  }
+
+  // If last line is not a sentence end, check if next line continues the sentence
+  if (!isSentenceEnd(result[result.length - 1])) {
+    const lastIdx = allLines.indexOf(result[result.length - 1]);
+    if (lastIdx < allLines.length - 1) {
+      const nextLine = allLines[lastIdx + 1];
+      // If next line is not a new sentence start, it's a continuation — include it
+      if (!isSentenceStart(nextLine)) {
+        result.push(nextLine);
+      }
+    }
+  }
+
+  return result;
+}
+
+function findChorus(lines, count) {
+  if (lines.length < count * 2) return null;
+  const chunks = [];
+  for (let i = 0; i <= lines.length - count; i++) {
+    chunks.push(lines.slice(i, i + count).join("|"));
+  }
+  const freq = {};
+  for (const c of chunks) {
+    freq[c] = (freq[c] || 0) + 1;
+  }
+  const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
+  for (const [chunk, cnt] of sorted.slice(0, 3)) {
+    if (cnt >= 2) return chunk.split("|");
+  }
+  return null;
+}
+
+function findCompleteSegment(lines, count) {
+  if (lines.length <= count) return lines;
+  let bestI = 0, bestS = -1;
+  for (let i = 0; i <= lines.length - count; i++) {
+    const seg = lines.slice(i, i + count);
+    let score = 0;
+    for (const line of seg) {
+      const last = line[line.length - 1];
+      if ("。！？；".includes(last)) score += 5;
+      else if ("，、：…~".includes(last)) score += 2;
+      const first = line[0];
+      if (!"而但却就才还也又的地得和与及".includes(first)) score += 3;
+      if (line.length >= 8 && line.length <= 20) score += 2;
+    }
+    const lens = seg.map(l => l.length);
+    const avg = lens.reduce((a, b) => a + b, 0) / lens.length;
+    const variance = lens.reduce((s, l) => s + (l - avg) ** 2, 0) / lens.length;
+    if (variance < 16) score += 5;
+    if (i > 0) score += 1;
+    // Key bonus: first line is sentence start + last line is sentence end
+    if (isSentenceStart(seg[0])) score += 8;
+    if (isSentenceEnd(seg[seg.length - 1])) score += 8;
     if (score > bestS) { bestS = score; bestI = i; }
   }
-  return seg.slice(bestI, bestI + count);
+  return lines.slice(bestI, bestI + count);
 }
 
 export default async function handler(req) {

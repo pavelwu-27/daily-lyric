@@ -24,6 +24,9 @@ DAILY_THEMES = [
     {"name": "花",     "keywords": ["邓丽君 花", "费玉清 花", "孟庭苇 花", "梅艳芳 花"], "bg": "flower"},
     {"name": "夜",     "keywords": ["蔡琴 夜", "邓丽君 月亮", "费玉清 夜", "齐秦 夜"], "bg": "night"},
     {"name": "时光",   "keywords": ["罗大佑 光阴", "李宗盛 时光", "周华健 时光", "陈奕迅 时光"], "bg": "time"},
+    {"name": "R&B",    "keywords": ["陶喆", "王力宏 R&B", "方大同", "周杰伦 R&B"], "bg": "rnb"},
+    {"name": "港台情歌", "keywords": ["张学友 情歌", "陈奕迅 情歌", "林俊杰", "孙燕姿"], "bg": "canto"},
+    {"name": "粤语经典", "keywords": ["陈奕迅 粤语", "张国荣 粤语", "谭咏麟 粤语", "Beyond 粤语"], "bg": "cantonese"},
 ]
 
 SEASON_KEYWORDS = {
@@ -116,27 +119,155 @@ def _parse_lyric(lrc_text):
 
 
 def pick_best_lines(lyric_lines, count=4):
+    """从歌词中选取完整的连续段落，优先副歌，确保句子完整"""
     if not lyric_lines:
         return []
-    candidates = [l for l in lyric_lines if 5 <= len(l) <= 30]
-    if not candidates:
+
+    # 过滤太短和太长的行，但保留原文不截断
+    candidates = [l for l in lyric_lines if 4 <= len(l) <= 40]
+    if len(candidates) < count:
         candidates = lyric_lines
-    mid = len(candidates) // 2
-    window = max(count * 2, 6)
-    start = max(0, mid - window // 2)
-    end = min(len(candidates), start + window)
-    segment = candidates[start:end]
-    if len(segment) <= count:
-        return segment
+
+    # 找副歌：重复出现的连续片段
+    chorus = _find_chorus(candidates, count)
+    if chorus:
+        # 副歌也要确保句子完整
+        return _ensure_complete_sentences(chorus, lyric_lines)
+
+    # 没找到副歌，找最完整的一段连续句子
+    return _find_complete_segment(candidates, count)
+
+
+def _find_chorus(lines, count):
+    """找重复出现的连续片段（副歌特征）"""
+    if len(lines) < count * 2:
+        return None
+
+    # 把歌词分成 count 行一组，找重复的组
+    chunks = []
+    for i in range(len(lines) - count + 1):
+        chunks.append(tuple(lines[i : i + count]))
+
+    # 统计每个片段出现的次数
+    from collections import Counter
+    counter = Counter(chunks)
+
+    for chunk, freq in counter.most_common(3):
+        if freq >= 2 and len(chunk) == count:
+            return list(chunk)
+
+    return None
+
+
+def _is_sentence_start(text):
+    """判断一行是否是完整句子的开始（不是连接词/助词开头）"""
+    if not text:
+        return False
+    first = text[0]
+    # 连接词、助词、标点开头 → 不是句子开始
+    if first in "而但却就才还也又的地得和与及因为所以如果虽然哪怕哪怕哪怕哪":
+        return False
+    return True
+
+
+def _is_sentence_end(text):
+    """判断一行是否以完整句子结尾（有句末标点）"""
+    if not text:
+        return False
+    last = text[-1]
+    return last in "。！？；…~—》」』\"\""
+
+
+def _ensure_complete_sentences(segment, all_lines):
+    """确保选取的歌词段首行是句子开始，末行是句子结束。
+    如果首行不是句子开始，向前扩展；如果末行不是句子结束，向后扩展。"""
+    result = list(segment)
+    if not result:
+        return result
+
+    # 首行不是句子开始，尝试向前扩展
+    if not _is_sentence_start(result[0]):
+        for line in all_lines:
+            idx = all_lines.index(line)
+            # 在 all_lines 中找到 result[0] 的位置，向前找句子开始
+            if line == result[0] and idx > 0:
+                for j in range(idx - 1, -1, -1):
+                    if _is_sentence_end(all_lines[j]) or _is_sentence_start(all_lines[j + 1]):
+                        # j+1 是句子开始，但 result[0] 不是，
+                        # 说明 j 行是上一句结尾，j+1 行应该是当前句开始
+                        # 把 j+1 到 result[0] 之间的行加入
+                        # 但只加 result[0] 前面一行试试
+                        if _is_sentence_start(all_lines[idx - 1]):
+                            result.insert(0, all_lines[idx - 1])
+                        break
+                break
+
+    # 末行不是句子结束，尝试向后扩展
+    if not _is_sentence_end(result[-1]):
+        for line in all_lines:
+            idx = all_lines.index(line)
+            if line == result[-1] and idx < len(all_lines) - 1:
+                next_line = all_lines[idx + 1]
+                # 如果下一行是新句子开始，当前行可能省略了句末标点（歌词常见）
+                # 这种情况可以接受，不强制扩展
+                # 但如果下一行是当前句的延续，则扩展
+                if not _is_sentence_start(next_line):
+                    result.append(next_line)
+                break
+
+    return result
+
+
+def _find_complete_segment(lines, count):
+    """找一段语义完整的连续歌词，确保首行是句子开始、末行是句子结束"""
+    if len(lines) <= count:
+        return lines
+
     best_start = 0
-    best_score = 0
-    for i in range(len(segment) - count + 1):
-        chunk = segment[i : i + count]
-        score = sum(min(len(l), 20) for l in chunk)
+    best_score = -1
+
+    for i in range(len(lines) - count + 1):
+        segment = lines[i : i + count]
+        score = 0
+
+        for j, line in enumerate(segment):
+            # 行尾有完整标点
+            if line[-1] in "。！？；":
+                score += 5
+            elif line[-1] in "，、：…~":
+                score += 2
+
+            # 行首不是连接词（说明是完整句子的开始）
+            first_char = line[0]
+            if first_char not in "而但却就才还也又的地得和与及":
+                score += 3
+
+            # 字数在8-20之间（节奏感好）
+            if 8 <= len(line) <= 20:
+                score += 2
+
+        # 相邻行字数差异小 → 韵律感好
+        lengths = [len(l) for l in segment]
+        avg_len = sum(lengths) / len(lengths)
+        variance = sum((l - avg_len) ** 2 for l in lengths) / len(lengths)
+        if variance < 16:  # 标准差 < 4
+            score += 5
+
+        # 不从歌词最开头取（前奏部分可能不完整）
+        if i > 0:
+            score += 1
+
+        # 关键加分：首行是句子开始 + 末行是句子结束
+        if _is_sentence_start(segment[0]):
+            score += 8
+        if _is_sentence_end(segment[-1]):
+            score += 8
+
         if score > best_score:
             best_score = score
             best_start = i
-    return segment[best_start : best_start + count]
+
+    return lines[best_start : best_start + count]
 
 
 def get_one_lyric(date_str, month, offset):

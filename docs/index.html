@@ -37,6 +37,9 @@ body.wind     { background: linear-gradient(160deg, #c3cfe2 0%, #f5f7fa 100%); }
 body.flower   { background: linear-gradient(160deg, #fddb92 0%, #d1fdff 100%); }
 body.night    { background: linear-gradient(160deg, #0c3483 0%, #a2b6df 100%); }
 body.time     { background: linear-gradient(160deg, #d4d3dd 0%, #efefbb 100%); }
+body.rnb      { background: linear-gradient(160deg, #667eea 0%, #f5576c 100%); }
+body.canto    { background: linear-gradient(160deg, #ff9a9e 0%, #fecfef 100%); }
+body.cantonese { background: linear-gradient(160deg, #e44d26 0%, #f7df1e 100%); }
 body.default  { background: linear-gradient(160deg, #f6d365 0%, #fda085 100%); }
 
 /* 装饰层 */
@@ -448,6 +451,8 @@ function downloadCard() {
     ocean:    ['#667eea','#764ba2'], rain:     ['#616161','#9bc5c3'],
     wind:     ['#c3cfe2','#f5f7fa'], flower:   ['#fddb92','#d1fdff'],
     night:    ['#0c3483','#a2b6df'], time:     ['#d4d3dd','#efefbb'],
+    rnb:      ['#667eea','#f5576c'], canto:    ['#ff9a9e','#fecfef'],
+    cantonese:['#e44d26','#f7df1e'],
   };
   const colors = bgMap[data.theme_bg] || ['#f6d365','#fda085'];
   const grad = ctx.createLinearGradient(0, 0, W, H);
