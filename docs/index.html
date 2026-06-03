@@ -241,6 +241,7 @@ function renderLyric(index) {
     </div>
     <div class="nav">
       <button class="nav-btn" onclick="renderLyric(currentIndex-1)" ${index === 0 ? 'disabled' : ''}>上一首</button>
+      <button class="nav-btn" onclick="downloadCard()">保存卡片</button>
       <button class="nav-btn" onclick="renderLyric(currentIndex+1)" ${index >= lyrics.length - 1 ? 'disabled' : ''}>下一首</button>
     </div>
   `;
@@ -261,6 +262,97 @@ async function init() {
   } catch (e) {
     card.innerHTML = '<div style="opacity:0.8">加载失败，请稍后再试</div>';
   }
+}
+
+function downloadCard() {
+  const data = lyrics[currentIndex];
+  if (!data) return;
+
+  const W = 1080, H = 1440;
+  const canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // 背景渐变
+  const bgMap = {
+    miss:     ['#a18cd1','#fbc2eb'], freedom:  ['#43e97b','#38f9d7'],
+    gentle:   ['#fbc2eb','#a6c1ee'], passion:  ['#f5576c','#ff9a76'],
+    lonely:   ['#4b6cb7','#182848'], romantic: ['#f78ca0','#fe9a8b'],
+    farewell: ['#c471f5','#fa71cd'], youth:    ['#f6d365','#fda085'],
+    healing:  ['#89f7fe','#66a6ff'], jianghu:  ['#485563','#29323c'],
+    hometown: ['#ffecd2','#fcb69f'], dream:    ['#a18cd1','#5ee7df'],
+    ocean:    ['#667eea','#764ba2'], rain:     ['#616161','#9bc5c3'],
+    wind:     ['#c3cfe2','#f5f7fa'], flower:   ['#fddb92','#d1fdff'],
+    night:    ['#0c3483','#a2b6df'], time:     ['#d4d3dd','#efefbb'],
+  };
+  const colors = bgMap[data.theme_bg] || ['#f6d365','#fda085'];
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, colors[0]);
+  grad.addColorStop(1, colors[1]);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // 装饰圆
+  ctx.globalAlpha = 0.12;
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(160, 200, 200, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W-120, H-160, 160, 0, Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // 卡片背景
+  const cx = 80, cy = 160, cw = W-160, ch = H-320, cr = 40;
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.beginPath();
+  ctx.moveTo(cx+cr, cy);
+  ctx.lineTo(cx+cw-cr, cy); ctx.quadraticCurveTo(cx+cw, cy, cx+cw, cy+cr);
+  ctx.lineTo(cx+cw, cy+ch-cr); ctx.quadraticCurveTo(cx+cw, cy+ch, cx+cw-cr, cy+ch);
+  ctx.lineTo(cx+cr, cy+ch); ctx.quadraticCurveTo(cx, cy+ch, cx, cy+ch-cr);
+  ctx.lineTo(cx, cy+cr); ctx.quadraticCurveTo(cx, cy, cx+cr, cy);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // 日期 + 主题
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.font = '28px "Noto Serif SC", serif';
+  ctx.textAlign = 'center';
+  const metaText = lyrics._date ? `${lyrics._date}    ${data.theme}` : data.theme;
+  ctx.fillText(metaText, W/2, cy + 80);
+
+  // 歌词
+  ctx.fillStyle = '#fff';
+  ctx.font = '38px "Noto Serif SC", serif';
+  const lyricY = cy + 180;
+  const lineH = 80;
+  data.lyric.forEach((line, i) => {
+    ctx.fillText(line, W/2, lyricY + i * lineH);
+  });
+
+  // 分割线
+  const sepY = lyricY + data.lyric.length * lineH + 40;
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(W/2 - 160, sepY);
+  ctx.lineTo(W/2 + 160, sepY);
+  ctx.stroke();
+
+  // 歌曲信息
+  ctx.fillStyle = '#fff';
+  ctx.font = '600 32px "Noto Serif SC", serif';
+  ctx.fillText(`「${data.song}」`, W/2, sepY + 60);
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = '26px "Noto Serif SC", serif';
+  ctx.fillText(data.artist, W/2, sepY + 105);
+
+  // 导出
+  const link = document.createElement('a');
+  link.download = `歌词-${data.song}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
 }
 
 init();
