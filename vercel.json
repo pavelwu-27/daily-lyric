@@ -1,15 +1,5 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/lyric/index.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/lyric",
-      "dest": "api/lyric/index.js"
-    }
+  "rewrites": [
+    { "source": "/api/lyric", "destination": "/api/lyric" }
   ]
 }

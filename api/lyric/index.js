@@ -1,3 +1,58 @@
+export default async function handler(req, res) {
+  // 支持 Vercel Node.js runtime
+  const offset = parseInt((req.query?.offset) || "0");
+
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const month = now.getMonth() + 1;
+  const weekday = ["周日","周一","周二","周三","周四","周五","周六"][now.getDay()];
+  const dateDisplay = `${month}月${now.getDate()}日 ${weekday}`;
+
+  const seed = hashSeed(`daily-lyric-${dateStr}-${offset}`);
+  const rng = seededRandom(seed);
+
+  const theme = THEMES[Math.floor(rng() * THEMES.length)];
+  const season = getSeason(month);
+  const seasonKw = SEASON_KW[season] || [];
+  const kw1 = theme.keywords[Math.floor(rng() * theme.keywords.length)];
+  const kw2 = rng() > 0.5 && seasonKw.length ? seasonKw[Math.floor(rng() * seasonKw.length)] : "";
+  const keyword = kw2 ? `${kw1} ${kw2}` : kw1;
+
+  try {
+    const songs = await searchSongs(keyword);
+    if (!songs.length) {
+      return res.status(500).json({ error: "未找到歌曲" });
+    }
+
+    let song = songs[Math.floor(rng() * songs.length)];
+    let lyricLines = null;
+    for (const s of [song, ...songs.filter(x => x.id !== song.id)]) {
+      const lines = await getLyric(s.id);
+      if (lines && lines.length >= 3) {
+        lyricLines = lines;
+        song = s;
+        break;
+      }
+    }
+
+    if (!lyricLines) {
+      return res.status(500).json({ error: "未找到歌词" });
+    }
+
+    res.setHeader("Cache-Control", "public, max-age=300");
+    return res.status(200).json({
+      date: dateDisplay,
+      song: song.name,
+      artist: song.artist,
+      lyric: pickBestLines(lyricLines),
+      theme: theme.name,
+      theme_bg: theme.bg,
+    });
+  } catch (e) {
+    return res.status(500).json({ error: String(e) });
+  }
+}
+
 const THEMES = [
   { name: "思念", keywords: ["思念", "远方", "等待", "回忆"], bg: "miss" },
   { name: "自由", keywords: ["自由", "远方", "旅行", "流浪"], bg: "freedom" },
@@ -27,15 +82,15 @@ const SEASON_KW = {
 };
 
 function getSeason(month) {
-  if ([3, 4, 5].includes(month)) return "spring";
-  if ([6, 7, 8].includes(month)) return "summer";
-  if ([9, 10, 11].includes(month)) return "autumn";
+  if ([3,4,5].includes(month)) return "spring";
+  if ([6,7,8].includes(month)) return "summer";
+  if ([9,10,11].includes(month)) return "autumn";
   return "winter";
 }
 
 function seededRandom(seed) {
   let s = seed;
-  return function () {
+  return function() {
     s = (s * 1664525 + 1013904223) & 0xffffffff;
     return (s >>> 0) / 0xffffffff;
   };
@@ -51,9 +106,9 @@ function hashSeed(str) {
 }
 
 function isChineseOrEnglish(text) {
-  if (!text.trim()) return false;
+  if (!text || !text.trim()) return false;
   if (/[ぁ-んァ-ヶ]/.test(text) || /[가-힣]/.test(text)) return false;
-  const cjk = (text.match(/[一-鿿㐀-䶿]/g) || []).length;
+  const cjk = (text.match(/[一-鿿-鿿㐀-䶿]/g) || []).length;
   const en = (text.match(/[a-zA-Z]/g) || []).length;
   return (cjk + en) / text.trim().length > 0.5;
 }
@@ -62,55 +117,35 @@ async function neteaseFetch(url, params) {
   const qs = new URLSearchParams(params).toString();
   const fullUrl = qs ? `${url}?${qs}` : url;
   const resp = await fetch(fullUrl, {
-    headers: {
-      "User-Agent": "Mozilla/5.0",
-      Referer: "https://music.163.com/",
-    },
+    headers: { "User-Agent": "Mozilla/5.0", "Referer": "https://music.163.com/" },
   });
   return resp.json();
 }
 
 async function searchSongs(keyword) {
   const data = await neteaseFetch("https://music.163.com/api/search/get", {
-    s: keyword,
-    type: "1",
-    limit: "30",
-    offset: "0",
+    s: keyword, type: "1", limit: "30", offset: "0",
   });
   if (!data || data.code !== 200) return [];
   return (data.result?.songs || [])
-    .filter(
-      (s) =>
-        isChineseOrEnglish(s.name) ||
-        isChineseOrEnglish(s.artists.map((a) => a.name).join(","))
-    )
-    .map((s) => ({
-      id: s.id,
-      name: s.name,
-      artist: s.artists.map((a) => a.name).join(", "),
-    }));
+    .filter(s => isChineseOrEnglish(s.name) || isChineseOrEnglish(s.artists.map(a => a.name).join(",")))
+    .map(s => ({ id: s.id, name: s.name, artist: s.artists.map(a => a.name).join(", ") }));
 }
 
 async function getLyric(songId) {
   const data = await neteaseFetch("https://music.163.com/api/song/lyric", {
-    id: String(songId),
-    lv: "1",
-    tv: "-1",
+    id: String(songId), lv: "1", tv: "-1",
   });
   if (!data || data.code !== 200) return null;
   const lrc = data.lrc?.lyric || "";
-  return lrc
-    .trim()
-    .split("\n")
-    .map((line) => line.replace(/\[\d+:\d+\.\d+\]/g, "").trim())
-    .filter(
-      (text) => text && !text.startsWith("//") && isChineseOrEnglish(text)
-    );
+  return lrc.trim().split("\n")
+    .map(line => line.replace(/\[\d+:\d+\.\d+\]/g, "").trim())
+    .filter(text => text && !text.startsWith("//") && isChineseOrEnglish(text));
 }
 
 function pickBestLines(lines, count = 4) {
   if (!lines || !lines.length) return [];
-  let cands = lines.filter((l) => l.length >= 5 && l.length <= 30);
+  let cands = lines.filter(l => l.length >= 5 && l.length <= 30);
   if (!cands.length) cands = lines;
   const mid = Math.floor(cands.length / 2);
   const win = Math.max(count * 2, 6);
@@ -118,91 +153,10 @@ function pickBestLines(lines, count = 4) {
   const end = Math.min(cands.length, start + win);
   const seg = cands.slice(start, end);
   if (seg.length <= count) return seg;
-  let bestI = 0,
-    bestS = 0;
+  let bestI = 0, bestS = 0;
   for (let i = 0; i <= seg.length - count; i++) {
-    const score = seg
-      .slice(i, i + count)
-      .reduce((s, l) => s + Math.min(l.length, 20), 0);
-    if (score > bestS) {
-      bestS = score;
-      bestI = i;
-    }
+    const score = seg.slice(i, i + count).reduce((s, l) => s + Math.min(l.length, 20), 0);
+    if (score > bestS) { bestS = score; bestI = i; }
   }
   return seg.slice(bestI, bestI + count);
-}
-
-export default async function handler(req) {
-  const url = new URL(req.url);
-  const offset = parseInt(url.searchParams.get("offset") || "0");
-
-  const now = new Date();
-  const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-  const month = now.getMonth() + 1;
-  const weekday = ["周日","周一","周二","周三","周四","周五","周六"][now.getDay()];
-  const dateDisplay = `${month}月${now.getDate()}日 ${weekday}`;
-
-  const seed = hashSeed(`daily-lyric-${dateStr}-${offset}`);
-  const rng = seededRandom(seed);
-
-  const theme = THEMES[Math.floor(rng() * THEMES.length)];
-  const season = getSeason(month);
-  const seasonKw = SEASON_KW[season] || [];
-  const kw1 = theme.keywords[Math.floor(rng() * theme.keywords.length)];
-  const kw2 =
-    rng() > 0.5 && seasonKw.length
-      ? seasonKw[Math.floor(rng() * seasonKw.length)]
-      : "";
-  const keyword = kw2 ? `${kw1} ${kw2}` : kw1;
-
-  try {
-    const songs = await searchSongs(keyword);
-    if (!songs.length) {
-      return new Response(JSON.stringify({ error: "未找到歌曲" }), {
-        status: 500,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-      });
-    }
-
-    let song = songs[Math.floor(rng() * songs.length)];
-    let lyricLines = null;
-    for (const s of [song, ...songs.filter((x) => x.id !== song.id)]) {
-      const lines = await getLyric(s.id);
-      if (lines && lines.length >= 3) {
-        lyricLines = lines;
-        song = s;
-        break;
-      }
-    }
-
-    if (!lyricLines) {
-      return new Response(JSON.stringify({ error: "未找到歌词" }), {
-        status: 500,
-        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-      });
-    }
-
-    return new Response(
-      JSON.stringify({
-        date: dateDisplay,
-        song: song.name,
-        artist: song.artist,
-        lyric: pickBestLines(lyricLines),
-        theme: theme.name,
-        theme_bg: theme.bg,
-      }),
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          "Cache-Control": "public, max-age=300",
-        },
-      }
-    );
-  } catch (e) {
-    return new Response(JSON.stringify({ error: String(e) }), {
-      status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-    });
-  }
 }
