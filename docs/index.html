@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每日歌词</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Noto Serif SC', serif;
+  transition: background 1.2s ease;
+  overflow: hidden;
+}
+
+body.miss     { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
+body.freedom  { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+body.gentle   { background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%); }
+body.passion  { background: linear-gradient(135deg, #f5576c 0%, #ff9a76 100%); }
+body.lonely   { background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%); }
+body.romantic { background: linear-gradient(135deg, #f78ca0 0%, #fe9a8b 100%); }
+body.farewell { background: linear-gradient(135deg, #c471f5 0%, #fa71cd 100%); }
+body.youth    { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
+body.healing  { background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); }
+body.jianghu  { background: linear-gradient(135deg, #485563 0%, #29323c 100%); }
+body.hometown { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+body.dream    { background: linear-gradient(135deg, #a18cd1 0%, #5ee7df 100%); }
+body.ocean    { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+body.rain     { background: linear-gradient(135deg, #616161 0%, #9bc5c3 100%); }
+body.wind     { background: linear-gradient(135deg, #c3cfe2 0%, #f5f7fa 100%); }
+body.flower   { background: linear-gradient(135deg, #fddb92 0%, #d1fdff 100%); }
+body.night    { background: linear-gradient(135deg, #0c3483 0%, #a2b6df 100%); }
+body.time     { background: linear-gradient(135deg, #d4d3dd 0%, #efefbb 100%); }
+body.default  { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
+
+.orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+  pointer-events: none;
+  animation: float 8s ease-in-out infinite;
+}
+.orb-1 { width: 400px; height: 400px; top: -100px; left: -100px; background: rgba(255,255,255,0.4); }
+.orb-2 { width: 300px; height: 300px; bottom: -80px; right: -80px; background: rgba(255,255,255,0.3); animation-delay: -4s; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-30px); }
+}
+
+.card {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 24px;
+  padding: 48px 56px;
+  max-width: 520px;
+  width: 90%;
+  text-align: center;
+  color: #fff;
+  position: relative;
+  animation: fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 14px;
+  opacity: 0.85;
+  margin-bottom: 36px;
+  letter-spacing: 1px;
+}
+
+.meta .divider {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+}
+
+.meta .theme-tag {
+  padding: 2px 12px;
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 12px;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.lyric {
+  font-size: 22px;
+  line-height: 2;
+  margin-bottom: 36px;
+  min-height: 120px;
+  font-weight: 400;
+  letter-spacing: 2px;
+}
+
+.lyric .line {
+  opacity: 0;
+  animation: lineIn 0.6s ease forwards;
+}
+
+@keyframes lineIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.song-info {
+  border-top: 1px solid rgba(255,255,255,0.2);
+  padding-top: 24px;
+}
+
+.song-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.artist {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.nav {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.nav-btn {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+  padding: 8px 24px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  transition: all 0.3s;
+  letter-spacing: 1px;
+}
+
+.nav-btn:hover {
+  background: rgba(255,255,255,0.35);
+}
+
+.nav-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.loading {
+  font-size: 16px;
+  opacity: 0.7;
+  letter-spacing: 2px;
+}
+
+.loading::after {
+  content: '';
+  animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0%  { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+}
+</style>
+</head>
+<body class="default">
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="card" id="card">
+  <div class="loading">正在为你挑选今日歌词</div>
+</div>
+
+<script>
+let lyrics = [];
+let currentIndex = 0;
+
+async function loadData() {
+  const card = document.getElementById('card');
+  try {
+    const res = await fetch('data.json');
+    const data = await res.json();
+    lyrics = data.lyrics || [];
+    if (lyrics.length === 0) {
+      card.innerHTML = '<div style="opacity:0.8">今日歌词还未生成，请稍后再来</div>';
+      return;
+    }
+    renderLyric(0);
+  } catch (e) {
+    card.innerHTML = '<div style="opacity:0.8">加载失败，请稍后再试</div>';
+  }
+}
+
+function renderLyric(index) {
+  const data = lyrics[index];
+  if (!data) return;
+  currentIndex = index;
+
+  document.body.className = data.theme_bg || 'default';
+
+  const lyricHtml = data.lyric.map((line, i) =>
+    `<div class="line" style="animation-delay:${0.3 + i * 0.2}s">${line}</div>`
+  ).join('');
+
+  const card = document.getElementById('card');
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = '';
+
+  card.innerHTML = `
+    <div class="meta">
+      <span>${lyrics._date || ''}</span>
+      <div class="divider"></div>
+      <span class="theme-tag">${data.theme}</span>
+    </div>
+    <div class="lyric">${lyricHtml}</div>
+    <div class="song-info">
+      <div class="song-name">「${data.song}」</div>
+      <div class="artist">${data.artist}</div>
+    </div>
+    <div class="nav">
+      <button class="nav-btn" onclick="renderLyric(currentIndex-1)" ${index === 0 ? 'disabled' : ''}>上一首</button>
+      <button class="nav-btn" onclick="renderLyric(currentIndex+1)" ${index >= lyrics.length - 1 ? 'disabled' : ''}>下一首</button>
+    </div>
+  `;
+}
+
+async function init() {
+  const card = document.getElementById('card');
+  try {
+    const res = await fetch('data.json');
+    const data = await res.json();
+    lyrics = data.lyrics || [];
+    lyrics._date = data.date;
+    if (lyrics.length === 0) {
+      card.innerHTML = '<div style="opacity:0.8">今日歌词还未生成，请稍后再来</div>';
+      return;
+    }
+    renderLyric(0);
+  } catch (e) {
+    card.innerHTML = '<div style="opacity:0.8">加载失败，请稍后再试</div>';
+  }
+}
+
+init();
+</script>
+</body>
+</html>
