@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>每日歌词</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -16,159 +16,266 @@ body {
   justify-content: center;
   font-family: 'Noto Serif SC', serif;
   transition: background 1.2s ease;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
-body.miss     { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
-body.freedom  { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-body.gentle   { background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%); }
-body.passion  { background: linear-gradient(135deg, #f5576c 0%, #ff9a76 100%); }
-body.lonely   { background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%); }
-body.romantic { background: linear-gradient(135deg, #f78ca0 0%, #fe9a8b 100%); }
-body.farewell { background: linear-gradient(135deg, #c471f5 0%, #fa71cd 100%); }
-body.youth    { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
-body.healing  { background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); }
-body.jianghu  { background: linear-gradient(135deg, #485563 0%, #29323c 100%); }
-body.hometown { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
-body.dream    { background: linear-gradient(135deg, #a18cd1 0%, #5ee7df 100%); }
-body.ocean    { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-body.rain     { background: linear-gradient(135deg, #616161 0%, #9bc5c3 100%); }
-body.wind     { background: linear-gradient(135deg, #c3cfe2 0%, #f5f7fa 100%); }
-body.flower   { background: linear-gradient(135deg, #fddb92 0%, #d1fdff 100%); }
-body.night    { background: linear-gradient(135deg, #0c3483 0%, #a2b6df 100%); }
-body.time     { background: linear-gradient(135deg, #d4d3dd 0%, #efefbb 100%); }
-body.default  { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
+body.miss     { background: linear-gradient(160deg, #a18cd1 0%, #fbc2eb 100%); }
+body.freedom  { background: linear-gradient(160deg, #43e97b 0%, #38f9d7 100%); }
+body.gentle   { background: linear-gradient(160deg, #fbc2eb 0%, #a6c1ee 100%); }
+body.passion  { background: linear-gradient(160deg, #f5576c 0%, #ff9a76 100%); }
+body.lonely   { background: linear-gradient(160deg, #4b6cb7 0%, #182848 100%); }
+body.romantic { background: linear-gradient(160deg, #f78ca0 0%, #fe9a8b 100%); }
+body.farewell { background: linear-gradient(160deg, #c471f5 0%, #fa71cd 100%); }
+body.youth    { background: linear-gradient(160deg, #f6d365 0%, #fda085 100%); }
+body.healing  { background: linear-gradient(160deg, #89f7fe 0%, #66a6ff 100%); }
+body.jianghu  { background: linear-gradient(160deg, #485563 0%, #29323c 100%); }
+body.hometown { background: linear-gradient(160deg, #ffecd2 0%, #fcb69f 100%); }
+body.dream    { background: linear-gradient(160deg, #a18cd1 0%, #5ee7df 100%); }
+body.ocean    { background: linear-gradient(160deg, #667eea 0%, #764ba2 100%); }
+body.rain     { background: linear-gradient(160deg, #616161 0%, #9bc5c3 100%); }
+body.wind     { background: linear-gradient(160deg, #c3cfe2 0%, #f5f7fa 100%); }
+body.flower   { background: linear-gradient(160deg, #fddb92 0%, #d1fdff 100%); }
+body.night    { background: linear-gradient(160deg, #0c3483 0%, #a2b6df 100%); }
+body.time     { background: linear-gradient(160deg, #d4d3dd 0%, #efefbb 100%); }
+body.default  { background: linear-gradient(160deg, #f6d365 0%, #fda085 100%); }
 
+/* 装饰层 */
 .orb {
   position: fixed;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.3;
+  filter: blur(100px);
+  opacity: 0.25;
   pointer-events: none;
-  animation: float 8s ease-in-out infinite;
+  animation: float 10s ease-in-out infinite;
 }
-.orb-1 { width: 400px; height: 400px; top: -100px; left: -100px; background: rgba(255,255,255,0.4); }
-.orb-2 { width: 300px; height: 300px; bottom: -80px; right: -80px; background: rgba(255,255,255,0.3); animation-delay: -4s; }
+.orb-1 { width: 500px; height: 500px; top: -150px; left: -120px; background: rgba(255,255,255,0.5); }
+.orb-2 { width: 400px; height: 400px; bottom: -100px; right: -100px; background: rgba(255,255,255,0.4); animation-delay: -5s; }
+.orb-3 { width: 200px; height: 200px; top: 50%; right: 10%; background: rgba(255,255,255,0.2); animation-delay: -3s; }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-30px); }
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-25px) scale(1.03); }
 }
 
+/* 粒子装饰 */
+.particles {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.particle {
+  position: absolute;
+  width: 4px; height: 4px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 50%;
+  animation: drift linear infinite;
+}
+@keyframes drift {
+  from { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  to { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+}
+
+/* 卡片 */
 .card {
-  background: rgba(255,255,255,0.15);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.25);
-  border-radius: 24px;
-  padding: 48px 56px;
-  max-width: 520px;
-  width: 90%;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 28px;
+  padding: 56px 64px 48px;
+  max-width: 560px;
+  width: 92%;
   text-align: center;
   color: #fff;
   position: relative;
-  animation: fadeIn 0.8s ease;
+  z-index: 1;
+  animation: cardIn 1s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(30px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* 顶部装饰线 */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 60px; height: 3px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.5);
+}
+
+/* 日期+主题 */
 .meta {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  font-size: 14px;
-  opacity: 0.85;
-  margin-bottom: 36px;
-  letter-spacing: 1px;
+  gap: 14px;
+  font-size: 13px;
+  opacity: 0.8;
+  margin-bottom: 44px;
+  letter-spacing: 1.5px;
+  font-weight: 300;
 }
 
-.meta .divider {
-  width: 4px;
-  height: 4px;
+.meta .dot {
+  width: 3px; height: 3px;
   border-radius: 50%;
   background: rgba(255,255,255,0.5);
 }
 
 .meta .theme-tag {
-  padding: 2px 12px;
-  border: 1px solid rgba(255,255,255,0.4);
-  border-radius: 12px;
+  padding: 3px 14px;
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 14px;
   font-size: 12px;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
+  font-weight: 400;
 }
 
+/* 歌词引号装饰 */
+.quote-mark {
+  font-size: 48px;
+  line-height: 1;
+  opacity: 0.2;
+  font-weight: 700;
+  margin-bottom: -8px;
+  user-select: none;
+}
+
+/* 歌词 */
 .lyric {
-  font-size: 22px;
-  line-height: 2;
-  margin-bottom: 36px;
-  min-height: 120px;
+  font-size: 24px;
+  line-height: 2.2;
+  margin-bottom: 40px;
+  min-height: 140px;
   font-weight: 400;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
 }
 
 .lyric .line {
   opacity: 0;
-  animation: lineIn 0.6s ease forwards;
+  animation: lineIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes lineIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(12px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* 歌曲信息 */
 .song-info {
-  border-top: 1px solid rgba(255,255,255,0.2);
-  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  padding-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .song-name {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
-  margin-bottom: 4px;
+  letter-spacing: 1px;
 }
 
 .artist {
-  font-size: 13px;
-  opacity: 0.7;
+  font-size: 14px;
+  opacity: 0.6;
+  font-weight: 300;
+  letter-spacing: 1px;
 }
 
-.nav {
+/* 底部操作栏 */
+.actions {
   display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 16px;
-  margin-top: 28px;
+  gap: 12px;
+  margin-top: 32px;
 }
 
-.nav-btn {
-  background: rgba(255,255,255,0.2);
-  border: 1px solid rgba(255,255,255,0.3);
+.btn {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
   color: #fff;
-  padding: 8px 24px;
-  border-radius: 20px;
+  padding: 10px 28px;
+  border-radius: 24px;
   cursor: pointer;
   font-family: inherit;
   font-size: 13px;
   transition: all 0.3s;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.nav-btn:hover {
-  background: rgba(255,255,255,0.35);
+.btn:hover {
+  background: rgba(255,255,255,0.3);
+  transform: translateY(-1px);
 }
 
-.nav-btn:disabled {
-  opacity: 0.3;
+.btn:disabled {
+  opacity: 0.25;
   cursor: default;
+  transform: none;
 }
 
+.btn.primary {
+  background: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.35);
+}
+
+/* 页码指示器 */
+.indicator {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.dot-indicator {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.dot-indicator.active {
+  background: rgba(255,255,255,0.8);
+  width: 20px;
+  border-radius: 3px;
+}
+
+/* 底部版权 */
+.footer {
+  position: fixed;
+  bottom: 20px;
+  left: 0; right: 0;
+  text-align: center;
+  color: rgba(255,255,255,0.3);
+  font-size: 11px;
+  letter-spacing: 1px;
+  font-weight: 300;
+  z-index: 0;
+}
+
+/* loading */
 .loading {
   font-size: 16px;
   opacity: 0.7;
   letter-spacing: 2px;
+  font-weight: 300;
+  padding: 60px 0;
 }
 
 .loading::after {
@@ -182,45 +289,58 @@ body.default  { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
   50% { content: '..'; }
   75% { content: '...'; }
 }
+
+@media (max-width: 600px) {
+  .card { padding: 40px 32px 36px; border-radius: 20px; }
+  .lyric { font-size: 20px; letter-spacing: 2px; }
+  .quote-mark { font-size: 36px; }
+  .btn { padding: 8px 20px; font-size: 12px; }
+}
 </style>
 </head>
 <body class="default">
 <div class="orb orb-1"></div>
 <div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="particles" id="particles"></div>
 
 <div class="card" id="card">
   <div class="loading">正在为你挑选今日歌词</div>
 </div>
 
+<div class="footer">每日歌词 · 每天一首，与你相伴</div>
+
 <script>
 let lyrics = [];
 let currentIndex = 0;
 
-async function loadData() {
-  const card = document.getElementById('card');
-  try {
-    const res = await fetch('data.json');
-    const data = await res.json();
-    lyrics = data.lyrics || [];
-    if (lyrics.length === 0) {
-      card.innerHTML = '<div style="opacity:0.8">今日歌词还未生成，请稍后再来</div>';
-      return;
-    }
-    renderLyric(0);
-  } catch (e) {
-    card.innerHTML = '<div style="opacity:0.8">加载失败，请稍后再试</div>';
+// 粒子
+function createParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.width = p.style.height = (2 + Math.random() * 4) + 'px';
+    p.style.animationDuration = (8 + Math.random() * 12) + 's';
+    p.style.animationDelay = (-Math.random() * 15) + 's';
+    container.appendChild(p);
   }
 }
+createParticles();
 
 function renderLyric(index) {
   const data = lyrics[index];
   if (!data) return;
   currentIndex = index;
-
   document.body.className = data.theme_bg || 'default';
 
   const lyricHtml = data.lyric.map((line, i) =>
-    `<div class="line" style="animation-delay:${0.3 + i * 0.2}s">${line}</div>`
+    `<div class="line" style="animation-delay:${0.15 + i * 0.12}s">${line}</div>`
+  ).join('');
+
+  const dotsHtml = lyrics.map((_, i) =>
+    `<div class="dot-indicator${i === index ? ' active' : ''}" onclick="renderLyric(${i})"></div>`
   ).join('');
 
   const card = document.getElementById('card');
@@ -231,37 +351,22 @@ function renderLyric(index) {
   card.innerHTML = `
     <div class="meta">
       <span>${lyrics._date || ''}</span>
-      <div class="divider"></div>
+      <div class="dot"></div>
       <span class="theme-tag">${data.theme}</span>
     </div>
+    <div class="quote-mark">"</div>
     <div class="lyric">${lyricHtml}</div>
     <div class="song-info">
       <div class="song-name">「${data.song}」</div>
       <div class="artist">${data.artist}</div>
     </div>
-    <div class="nav">
-      <button class="nav-btn" onclick="renderLyric(currentIndex-1)" ${index === 0 ? 'disabled' : ''}>上一首</button>
-      <button class="nav-btn" onclick="downloadCard()">保存卡片</button>
-      <button class="nav-btn" onclick="renderLyric(currentIndex+1)" ${index >= lyrics.length - 1 ? 'disabled' : ''}>下一首</button>
+    <div class="actions">
+      <button class="btn" onclick="renderLyric(currentIndex-1)" ${index === 0 ? 'disabled' : ''}>&larr; 上一首</button>
+      <button class="btn primary" onclick="downloadCard()">保存卡片</button>
+      <button class="btn" onclick="renderLyric(currentIndex+1)" ${index >= lyrics.length - 1 ? 'disabled' : ''}>下一首 &rarr;</button>
     </div>
+    <div class="indicator">${dotsHtml}</div>
   `;
-}
-
-async function init() {
-  const card = document.getElementById('card');
-  try {
-    const res = await fetch('data.json');
-    const data = await res.json();
-    lyrics = data.lyrics || [];
-    lyrics._date = data.date;
-    if (lyrics.length === 0) {
-      card.innerHTML = '<div style="opacity:0.8">今日歌词还未生成，请稍后再来</div>';
-      return;
-    }
-    renderLyric(0);
-  } catch (e) {
-    card.innerHTML = '<div style="opacity:0.8">加载失败，请稍后再试</div>';
-  }
 }
 
 function downloadCard() {
@@ -274,7 +379,6 @@ function downloadCard() {
   canvas.height = H;
   const ctx = canvas.getContext('2d');
 
-  // 背景渐变
   const bgMap = {
     miss:     ['#a18cd1','#fbc2eb'], freedom:  ['#43e97b','#38f9d7'],
     gentle:   ['#fbc2eb','#a6c1ee'], passion:  ['#f5576c','#ff9a76'],
@@ -296,13 +400,14 @@ function downloadCard() {
   // 装饰圆
   ctx.globalAlpha = 0.12;
   ctx.fillStyle = '#fff';
-  ctx.beginPath(); ctx.arc(160, 200, 200, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(W-120, H-160, 160, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(160, 200, 240, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W-120, H-160, 200, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(W*0.6, H*0.15, 100, 0, Math.PI*2); ctx.fill();
   ctx.globalAlpha = 1;
 
   // 卡片背景
-  const cx = 80, cy = 160, cw = W-160, ch = H-320, cr = 40;
-  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  const cx = 80, cy = 180, cw = W-160, ch = H-360, cr = 40;
+  ctx.fillStyle = 'rgba(255,255,255,0.12)';
   ctx.beginPath();
   ctx.moveTo(cx+cr, cy);
   ctx.lineTo(cx+cw-cr, cy); ctx.quadraticCurveTo(cx+cw, cy, cx+cw, cy+cr);
@@ -311,48 +416,78 @@ function downloadCard() {
   ctx.lineTo(cx, cy+cr); ctx.quadraticCurveTo(cx, cy, cx+cr, cy);
   ctx.closePath();
   ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
   ctx.lineWidth = 2;
   ctx.stroke();
 
+  // 顶部装饰线
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.fillRect(W/2 - 30, cy + 30, 60, 3);
+
   // 日期 + 主题
-  ctx.fillStyle = 'rgba(255,255,255,0.85)';
-  ctx.font = '28px "Noto Serif SC", serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.font = '26px "Noto Serif SC", serif';
   ctx.textAlign = 'center';
-  const metaText = lyrics._date ? `${lyrics._date}    ${data.theme}` : data.theme;
+  const metaText = lyrics._date ? `${lyrics._date}  ·  ${data.theme}` : data.theme;
   ctx.fillText(metaText, W/2, cy + 80);
+
+  // 引号装饰
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.font = 'bold 100px "Noto Serif SC", serif';
+  ctx.fillText('“', W/2, cy + 200);
 
   // 歌词
   ctx.fillStyle = '#fff';
-  ctx.font = '38px "Noto Serif SC", serif';
-  const lyricY = cy + 180;
-  const lineH = 80;
+  ctx.font = '40px "Noto Serif SC", serif';
+  const lyricY = cy + 260;
+  const lineH = 90;
   data.lyric.forEach((line, i) => {
     ctx.fillText(line, W/2, lyricY + i * lineH);
   });
 
   // 分割线
-  const sepY = lyricY + data.lyric.length * lineH + 40;
-  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+  const sepY = lyricY + data.lyric.length * lineH + 50;
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(W/2 - 160, sepY);
-  ctx.lineTo(W/2 + 160, sepY);
+  ctx.moveTo(W/2 - 180, sepY);
+  ctx.lineTo(W/2 + 180, sepY);
   ctx.stroke();
 
   // 歌曲信息
   ctx.fillStyle = '#fff';
-  ctx.font = '600 32px "Noto Serif SC", serif';
-  ctx.fillText(`「${data.song}」`, W/2, sepY + 60);
-  ctx.fillStyle = 'rgba(255,255,255,0.7)';
-  ctx.font = '26px "Noto Serif SC", serif';
-  ctx.fillText(data.artist, W/2, sepY + 105);
+  ctx.font = '600 34px "Noto Serif SC", serif';
+  ctx.fillText(`「${data.song}」`, W/2, sepY + 65);
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.font = '28px "Noto Serif SC", serif';
+  ctx.fillText(data.artist, W/2, sepY + 115);
 
-  // 导出
+  // 底部
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.font = '20px "Noto Serif SC", serif';
+  ctx.fillText('每日歌词', W/2, H - 50);
+
   const link = document.createElement('a');
   link.download = `歌词-${data.song}.png`;
   link.href = canvas.toDataURL('image/png');
   link.click();
+}
+
+async function init() {
+  const card = document.getElementById('card');
+  try {
+    const res = await fetch('data.json');
+    const data = await res.json();
+    lyrics = data.lyrics || [];
+    lyrics._date = data.date;
+    if (lyrics.length === 0) {
+      card.innerHTML = '<div style="opacity:0.8">今日歌词还未生成，请稍后再来</div>';
+      return;
+    }
+    renderLyric(0);
+  } catch (e) {
+    card.innerHTML = '<div style="opacity:0.8">加载失败，请稍后再试</div>';
+  }
 }
 
 init();
