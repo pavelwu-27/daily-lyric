@@ -313,6 +313,9 @@ body.default  { background: linear-gradient(160deg, #f6d365 0%, #fda085 100%); }
 <script>
 let lyrics = [];
 let currentIndex = 0;
+let apiOffset = 0;  // API 刷新偏移
+// 替换为你部署的 Worker 地址
+const API_URL = 'https://daily-lyric-api.pavelwu-27.workers.dev/api/lyric';
 
 // 粒子
 function createParticles() {
@@ -339,9 +342,12 @@ function renderLyric(index) {
     `<div class="line" style="animation-delay:${0.15 + i * 0.12}s">${line}</div>`
   ).join('');
 
-  const dotsHtml = lyrics.map((_, i) =>
+  const dotsHtml = lyrics.slice(0, 50).map((_, i) =>
     `<div class="dot-indicator${i === index ? ' active' : ''}" onclick="renderLyric(${i})"></div>`
   ).join('');
+
+  // 如果歌词超过本地池，显示更多指示
+  const moreDots = lyrics.length > 50 ? '<div class="dot-indicator" style="opacity:0.15">+</div>' : '';
 
   const card = document.getElementById('card');
   card.style.animation = 'none';
@@ -363,10 +369,35 @@ function renderLyric(index) {
     <div class="actions">
       <button class="btn" onclick="renderLyric(currentIndex-1)" ${index === 0 ? 'disabled' : ''}>&larr; 上一首</button>
       <button class="btn primary" onclick="downloadCard()">保存卡片</button>
-      <button class="btn" onclick="renderLyric(currentIndex+1)" ${index >= lyrics.length - 1 ? 'disabled' : ''}>下一首 &rarr;</button>
+      <button class="btn" onclick="fetchNext()">换一首 &rarr;</button>
     </div>
-    <div class="indicator">${dotsHtml}</div>
+    <div class="indicator">${dotsHtml}${moreDots}</div>
   `;
+}
+
+// 从 API 获取下一首
+async function fetchNext() {
+  const card = document.getElementById('card');
+  card.innerHTML = '<div class="loading">正在挑选新的歌词</div>';
+  document.body.className = 'default';
+
+  try {
+    const res = await fetch(`${API_URL}?offset=${apiOffset}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    apiOffset++;
+    lyrics.push(data);
+    renderLyric(lyrics.length - 1);
+  } catch (e) {
+    // API 失败，从本地池随机挑一首
+    if (lyrics.length > 1) {
+      let next;
+      do { next = Math.floor(Math.random() * lyrics.length); } while (next === currentIndex && lyrics.length > 1);
+      renderLyric(next);
+    } else {
+      card.innerHTML = '<div style="opacity:0.8">获取失败，请稍后再试</div>';
+    }
+  }
 }
 
 function downloadCard() {

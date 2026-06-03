@@ -176,7 +176,7 @@ def get_one_lyric(date_str, month, offset):
     }
 
 
-def generate_daily_data(count=7):
+def generate_daily_data(count=50):
     from datetime import datetime
     now = datetime.now()
     date_str = now.strftime("%Y-%m-%d")
@@ -206,4 +206,4 @@ def generate_daily_data(count=7):
 if __name__ == "__main__":
     import os
     os.makedirs("docs", exist_ok=True)
-    generate_daily_data(7)
+    generate_daily_data(50)
