@@ -19,28 +19,28 @@ body {
   overflow-x: hidden;
 }
 
-body.miss     { background: linear-gradient(160deg, #a18cd1 0%, #fbc2eb 100%); }
-body.freedom  { background: linear-gradient(160deg, #43e97b 0%, #38f9d7 100%); }
-body.gentle   { background: linear-gradient(160deg, #fbc2eb 0%, #a6c1ee 100%); }
-body.passion  { background: linear-gradient(160deg, #f5576c 0%, #ff9a76 100%); }
-body.lonely   { background: linear-gradient(160deg, #4b6cb7 0%, #182848 100%); }
-body.romantic { background: linear-gradient(160deg, #f78ca0 0%, #fe9a8b 100%); }
-body.farewell { background: linear-gradient(160deg, #c471f5 0%, #fa71cd 100%); }
-body.youth    { background: linear-gradient(160deg, #f6d365 0%, #fda085 100%); }
-body.healing  { background: linear-gradient(160deg, #89f7fe 0%, #66a6ff 100%); }
-body.jianghu  { background: linear-gradient(160deg, #485563 0%, #29323c 100%); }
-body.hometown { background: linear-gradient(160deg, #ffecd2 0%, #fcb69f 100%); }
-body.dream    { background: linear-gradient(160deg, #a18cd1 0%, #5ee7df 100%); }
-body.ocean    { background: linear-gradient(160deg, #667eea 0%, #764ba2 100%); }
-body.rain     { background: linear-gradient(160deg, #616161 0%, #9bc5c3 100%); }
-body.wind     { background: linear-gradient(160deg, #c3cfe2 0%, #f5f7fa 100%); }
-body.flower   { background: linear-gradient(160deg, #fddb92 0%, #d1fdff 100%); }
-body.night    { background: linear-gradient(160deg, #0c3483 0%, #a2b6df 100%); }
-body.time     { background: linear-gradient(160deg, #d4d3dd 0%, #efefbb 100%); }
-body.rnb      { background: linear-gradient(160deg, #667eea 0%, #f5576c 100%); }
-body.canto    { background: linear-gradient(160deg, #ff9a9e 0%, #fecfef 100%); }
-body.cantonese { background: linear-gradient(160deg, #e44d26 0%, #f7df1e 100%); }
-body.default  { background: linear-gradient(160deg, #f6d365 0%, #fda085 100%); }
+body.miss     { background: linear-gradient(160deg, #7c3aed 0%, #db2777 100%); }
+body.freedom  { background: linear-gradient(160deg, #059669 0%, #0d9488 100%); }
+body.gentle   { background: linear-gradient(160deg, #a855f7 0%, #6366f1 100%); }
+body.passion  { background: linear-gradient(160deg, #dc2626 0%, #ea580c 100%); }
+body.lonely   { background: linear-gradient(160deg, #3730a3 0%, #1e1b4b 100%); }
+body.romantic { background: linear-gradient(160deg, #e11d48 0%, #be185d 100%); }
+body.farewell { background: linear-gradient(160deg, #9333ea 0%, #c026d3 100%); }
+body.youth    { background: linear-gradient(160deg, #d97706 0%, #ea580c 100%); }
+body.healing  { background: linear-gradient(160deg, #2563eb 0%, #7c3aed 100%); }
+body.jianghu  { background: linear-gradient(160deg, #44403c 0%, #1c1917 100%); }
+body.hometown { background: linear-gradient(160deg, #c2410c 0%, #b45309 100%); }
+body.dream    { background: linear-gradient(160deg, #7c3aed 0%, #06b6d4 100%); }
+body.ocean    { background: linear-gradient(160deg, #4f46e5 0%, #7e22ce 100%); }
+body.rain     { background: linear-gradient(160deg, #475569 0%, #0f766e 100%); }
+body.wind     { background: linear-gradient(160deg, #6366f1 0%, #3b82f6 100%); }
+body.flower   { background: linear-gradient(160deg, #be185d 0%, #9333ea 100%); }
+body.night    { background: linear-gradient(160deg, #1e3a5f 0%, #312e81 100%); }
+body.time     { background: linear-gradient(160deg, #6d28d9 0%, #4338ca 100%); }
+body.rnb      { background: linear-gradient(160deg, #6d28d9 0%, #dc2626 100%); }
+body.canto    { background: linear-gradient(160deg, #be185d 0%, #9333ea 100%); }
+body.cantonese { background: linear-gradient(160deg, #b91c1c 0%, #a16207 100%); }
+body.default  { background: linear-gradient(160deg, #d97706 0%, #ea580c 100%); }
 
 /* 装饰层 */
 .orb {
@@ -442,17 +442,17 @@ function downloadCard() {
   const ctx = canvas.getContext('2d');
 
   const bgMap = {
-    miss:     ['#a18cd1','#fbc2eb'], freedom:  ['#43e97b','#38f9d7'],
-    gentle:   ['#fbc2eb','#a6c1ee'], passion:  ['#f5576c','#ff9a76'],
-    lonely:   ['#4b6cb7','#182848'], romantic: ['#f78ca0','#fe9a8b'],
-    farewell: ['#c471f5','#fa71cd'], youth:    ['#f6d365','#fda085'],
-    healing:  ['#89f7fe','#66a6ff'], jianghu:  ['#485563','#29323c'],
-    hometown: ['#ffecd2','#fcb69f'], dream:    ['#a18cd1','#5ee7df'],
-    ocean:    ['#667eea','#764ba2'], rain:     ['#616161','#9bc5c3'],
-    wind:     ['#c3cfe2','#f5f7fa'], flower:   ['#fddb92','#d1fdff'],
-    night:    ['#0c3483','#a2b6df'], time:     ['#d4d3dd','#efefbb'],
-    rnb:      ['#667eea','#f5576c'], canto:    ['#ff9a9e','#fecfef'],
-    cantonese:['#e44d26','#f7df1e'],
+    miss:     ['#7c3aed','#db2777'], freedom:  ['#059669','#0d9488'],
+    gentle:   ['#a855f7','#6366f1'], passion:  ['#dc2626','#ea580c'],
+    lonely:   ['#3730a3','#1e1b4b'], romantic: ['#e11d48','#be185d'],
+    farewell: ['#9333ea','#c026d3'], youth:    ['#d97706','#ea580c'],
+    healing:  ['#2563eb','#7c3aed'], jianghu:  ['#44403c','#1c1917'],
+    hometown: ['#c2410c','#b45309'], dream:    ['#7c3aed','#06b6d4'],
+    ocean:    ['#4f46e5','#7e22ce'], rain:     ['#475569','#0f766e'],
+    wind:     ['#6366f1','#3b82f6'], flower:   ['#be185d','#9333ea'],
+    night:    ['#1e3a5f','#312e81'], time:     ['#6d28d9','#4338ca'],
+    rnb:      ['#6d28d9','#dc2626'], canto:    ['#be185d','#9333ea'],
+    cantonese:['#b91c1c','#a16207'],
   };
   const colors = bgMap[data.theme_bg] || ['#f6d365','#fda085'];
   const grad = ctx.createLinearGradient(0, 0, W, H);

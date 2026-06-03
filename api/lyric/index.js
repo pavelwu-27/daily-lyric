@@ -155,20 +155,43 @@ function ensureCompleteSentences(segment, allLines) {
 }
 
 function findChorus(lines, count) {
-  if (lines.length < count * 2) return null;
-  const chunks = [];
-  for (let i = 0; i <= lines.length - count; i++) {
-    chunks.push(lines.slice(i, i + count).join("|"));
-  }
+  // Find chorus based on line repetition density.
+  // Chorus lines each appear >= 2 times in the whole song.
+  // Find a contiguous block of `count` lines where every line repeats.
+  if (lines.length < count + 2) return null;
+
+  // Count frequency of each line
   const freq = {};
-  for (const c of chunks) {
-    freq[c] = (freq[c] || 0) + 1;
+  for (const line of lines) {
+    freq[line] = (freq[line] || 0) + 1;
   }
-  const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
-  for (const [chunk, cnt] of sorted.slice(0, 3)) {
-    if (cnt >= 2) return chunk.split("|");
+
+  let bestSeg = null;
+  let bestScore = 0;
+
+  for (let i = 0; i <= lines.length - count; i++) {
+    const seg = lines.slice(i, i + count);
+    // Every line must repeat (appear >= 2 times)
+    const allRepeat = seg.every(l => freq[l] >= 2);
+    if (!allRepeat) continue;
+
+    let score = seg.reduce((s, l) => s + freq[l], 0);
+
+    // Bonus for contiguous repeat region extending beyond the segment
+    if (i > 0 && freq[lines[i - 1]] >= 2) score += 2;
+    if (i + count < lines.length && freq[lines[i + count]] >= 2) score += 2;
+
+    // Sentence completeness bonus
+    if (isSentenceStart(seg[0])) score += 3;
+    if (isSentenceEnd(seg[seg.length - 1])) score += 3;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestSeg = seg;
+    }
   }
-  return null;
+
+  return bestSeg;
 }
 
 function findCompleteSegment(lines, count) {
@@ -211,7 +234,18 @@ export default async function handler(req) {
   const seed = hashSeed(`daily-lyric-${dateStr}-${offset}`);
   const rng = seededRandom(seed);
 
-  const theme = THEMES[Math.floor(rng() * THEMES.length)];
+  // Shuffle-cycle themes for even coverage
+  const numThemes = THEMES.length;
+  const roundIdx = Math.floor(offset / numThemes);
+  const posInRound = offset % numThemes;
+  const shuffleRng = seededRandom(hashSeed(`daily-lyric-${dateStr}-${roundIdx * 1000}`));
+  const shuffled = [...THEMES];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(shuffleRng() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  const theme = shuffled[posInRound];
+
   const season = getSeason(month);
   const seasonKw = SEASON_KW[season] || [];
   const kw1 = theme.keywords[Math.floor(rng() * theme.keywords.length)];

@@ -139,24 +139,57 @@ def pick_best_lines(lyric_lines, count=4):
 
 
 def _find_chorus(lines, count):
-    """找重复出现的连续片段（副歌特征）"""
-    if len(lines) < count * 2:
+    """基于行重复密度找副歌区域。
+
+    核心思路：副歌的特征是其中每一行在整首歌词中至少出现2次。
+    扫描歌词，找出"连续 count 行都在全曲重复≥2次"的区域，
+    这就是副歌。
+    """
+    if len(lines) < count + 2:
         return None
 
-    # 把歌词分成 count 行一组，找重复的组
-    chunks = []
-    for i in range(len(lines) - count + 1):
-        chunks.append(tuple(lines[i : i + count]))
-
-    # 统计每个片段出现的次数
+    # 统计每行在全曲出现的次数
     from collections import Counter
-    counter = Counter(chunks)
+    line_freq = Counter(lines)
 
-    for chunk, freq in counter.most_common(3):
-        if freq >= 2 and len(chunk) == count:
-            return list(chunk)
+    # 找出重复行（出现≥2次）的索引
+    repeat_indices = [i for i, line in enumerate(lines) if line_freq[line] >= 2]
 
-    return None
+    if len(repeat_indices) < count:
+        return None
+
+    # 找连续区域：连续 count 个索引都在 repeat_indices 中
+    # 即找最长的连续 repeat_indices 片段
+    best_segment = None
+    best_score = 0
+
+    for i in range(len(lines) - count + 1):
+        segment = lines[i : i + count]
+        # 每行重复次数之和
+        score = sum(line_freq[line] for line in segment)
+        # 所有行都重复至少1次（即出现≥2次）
+        all_repeat = all(line_freq[line] >= 2 for line in segment)
+        if all_repeat:
+            # 额外奖励：连续区域越长越好
+            # 检查 i-1 和 i+count 是否也是重复行（扩展连续性）
+            extend_bonus = 0
+            if i > 0 and line_freq[lines[i - 1]] >= 2:
+                extend_bonus += 1
+            if i + count < len(lines) and line_freq[lines[i + count]] >= 2:
+                extend_bonus += 1
+            score += extend_bonus * 2
+
+            # 句子完整性加分
+            if _is_sentence_start(segment[0]):
+                score += 3
+            if _is_sentence_end(segment[-1]):
+                score += 3
+
+            if score > best_score:
+                best_score = score
+                best_segment = segment
+
+    return best_segment
 
 
 def _is_sentence_start(text):
@@ -272,7 +305,17 @@ def _find_complete_segment(lines, count):
 
 def get_one_lyric(date_str, month, offset):
     rng = random.Random(_seed(date_str, offset))
-    theme = rng.choice(DAILY_THEMES)
+
+    # 用洗牌循环确保主题均匀覆盖：每轮洗牌所有主题，按顺序取
+    num_themes = len(DAILY_THEMES)
+    round_idx = offset // num_themes      # 第几轮
+    pos_in_round = offset % num_themes     # 轮内位置
+    # 每轮用不同种子洗牌
+    shuffle_rng = random.Random(_seed(date_str, round_idx * 1000))
+    shuffled = list(DAILY_THEMES)
+    shuffle_rng.shuffle(shuffled)
+    theme = shuffled[pos_in_round]
+
     season = _get_season(month)
     season_kw = SEASON_KEYWORDS.get(season, [])
     kw1 = rng.choice(theme["keywords"])
